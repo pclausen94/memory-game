@@ -1,18 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
+import Card from "./components/Card";
+import ShuffleCardsSound from "./ShuffleCardsSound.mp3";
+import MatchSound from "./MatchSound.wav";
 
 const cardArray = [
-  { src: "/img/bird.jpg" },
-  { src: "/img/cat.jpg" },
-  { src: "/img/dog.jpg" },
-  { src: "/img/flamingo.jpg" },
-  { src: "/img/giraffe.jpg" },
-  { src: "/img/panda.jpg" },
+  { src: "/img/bird3.jpg", matched: false },
+  { src: "/img/cat3.jpg", matched: false },
+  { src: "/img/dog3.jpg", matched: false },
+  { src: "/img/flamingo3.jpg", matched: false },
+  { src: "/img/giraffe3.jpg", matched: false },
+  { src: "/img/panda3.jpg", matched: false },
 ];
 
 function App() {
   const [cards, setCards] = useState([]);
-  const [turns, setTurns] = useState(0);
+  const [rounds, setRounds] = useState(0);
+  const [firstChoice, setFirstChoice] = useState(null);
+  const [secondChoice, setSecondChoice] = useState(null);
+  const [disabled, setDisabled] = useState(false);
 
   // Shuffle cards
   const shuffleCards = () => {
@@ -20,29 +26,68 @@ function App() {
       .sort(() => Math.random() - 0.5)
       .map((card) => ({ ...card, id: Math.random() }));
 
+    setFirstChoice(null);
+    setSecondChoice(null);
+
+    new Audio(ShuffleCardsSound).play();
     setCards(shuffleCards);
-    setTurns(0);
+    setRounds(1);
   };
 
-  console.log(cards, turns);
+  const handleChoice = (card) => {
+    firstChoice ? setSecondChoice(card) : setFirstChoice(card);
+  };
+
+  useEffect(() => {
+    if (firstChoice && secondChoice) {
+      setDisabled(true);
+      if (firstChoice.src === secondChoice.src) {
+        new Audio(MatchSound).play();
+        setCards((prevCards) => {
+          return prevCards.map((card) => {
+            if (card.src === firstChoice.src) {
+              return { ...card, matched: true };
+            } else {
+              return card;
+            }
+          });
+        });
+        resetTurn();
+      } else {
+        setTimeout(() => resetTurn(), 1000);
+      }
+    }
+  }, [firstChoice, secondChoice]);
+
+  const resetTurn = () => {
+    setFirstChoice(null);
+    setSecondChoice(null);
+    setRounds((prevTurns) => prevTurns + 1);
+    setDisabled(false);
+  };
+
+  useEffect(() => {
+    shuffleCards();
+  }, []);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Vendespillet</h1>
-        <button onClick={shuffleCards}>Start</button>
-
-        <div className="card-grid">
-          {cards.map((card) => (
-            <div className="card" key={card.id}>
-              <div>
-                <img className="front" src={card.src} alt="card front" />
-                <img className="back" src="/img/back.jpg" alt="card back" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </header>
+      <h1>Vendespillet</h1>
+      <button onClick={shuffleCards}>Nyt spil</button>
+      <div className="card-grid">
+        {cards.map((card) => (
+          <Card
+            key={card.id}
+            card={card}
+            handleChoice={handleChoice}
+            flipped={
+              card === firstChoice || card === secondChoice || card.matched
+            }
+            disabled={disabled}
+          />
+        ))}
+      </div>
+      <p>Runde {rounds}</p>
     </div>
   );
 }

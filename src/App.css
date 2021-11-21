@@ -14,11 +14,20 @@ button {
 }
 button:hover {
     background: black;
+    cursor: pointer;
     color: white;
 }
-/* .card-grid {
+
+.front {
+    max-width: 200px;
+}
+
+.back {
+    max-width: 200px;
+}
+.card-grid {
     margin-top: 40px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-gap: 20px;
-} */
+}
