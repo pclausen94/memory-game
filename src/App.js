@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import Card from "./components/Card";
 import ShuffleCardsSound from "./ShuffleCardsSound.mp3";
@@ -19,6 +19,7 @@ function App() {
   const [firstChoice, setFirstChoice] = useState(null);
   const [secondChoice, setSecondChoice] = useState(null);
   const [disabled, setDisabled] = useState(false);
+  const winInput = useRef(null);
 
   // Shuffle cards
   const shuffleCards = () => {
@@ -30,6 +31,7 @@ function App() {
     setSecondChoice(null);
 
     new Audio(ShuffleCardsSound).play();
+
     setCards(shuffleCards);
     setRounds(1);
   };
@@ -70,10 +72,15 @@ function App() {
     shuffleCards();
   }, []);
 
+  // if (cards === cards.matched) {
+  //   console.log("hest");
+  // }
+
   return (
     <div className="App">
       <h1>Vendespillet</h1>
-      <button onClick={shuffleCards}>Nyt spil</button>
+      <button onClick={shuffleCards}>Start Nyt spil</button>
+      <h1 ref={winInput}>Tillykke du har vundet!</h1>
       <div className="card-grid">
         {cards.map((card) => (
           <Card
