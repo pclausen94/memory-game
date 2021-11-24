@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import Card from "./components/Card";
-import ShuffleCardsSound from "./ShuffleCardsSound.mp3";
-import MatchSound from "./MatchSound.wav";
+import Card from "./components/Card/Card";
+import ShuffleCardsSound from "./utils/ShuffleCardsSound.mp3";
+import MatchSound from "./utils/MatchSound.wav";
 
 const cardArray = [
   { src: "/img/bird3.jpg", matched: false },
@@ -22,7 +22,8 @@ function App() {
   const [matchedCardsCount, setMatchedCardsCount] = useState(0);
   const [gameWon, setGameWon] = useState({ isWon: false, msg: "" });
 
-  // Shuffle cards
+  /*   Denne shuffle algoritme gør brug af spread operatoren til at kører CardArray 
+  igennem 2 gange og sortere dem ved hjælp af et nummer, for til sidst at tilegne et card til specifikke numre (udnytter her id) */
   const shuffleCards = () => {
     const shuffleCards = [...cardArray, ...cardArray]
       .sort(() => Math.random() - 0.5)
@@ -30,8 +31,8 @@ function App() {
 
     setFirstChoice(null);
     setSecondChoice(null);
-
     setMatchedCardsCount(0);
+
     setGameWon({ isWon: false, msg: "" });
     new Audio(ShuffleCardsSound).play();
 
@@ -39,16 +40,19 @@ function App() {
     setRounds(1);
   };
 
+  // Sammenligner ved hjælp af useState, om første kort er det samme som det andet kort
   const handleChoice = (card) => {
     firstChoice ? setSecondChoice(card) : setFirstChoice(card);
   };
 
+  // Når matchedCardsCount er større end 0 (altså efter runde 1) og staten er det samme som cards divderet i 2 - altså arrayet, så opdatere den objektet med boolean og string
   useEffect(() => {
     if (matchedCardsCount > 0 && matchedCardsCount === cards.length / 2) {
       setGameWon({ isWon: true, msg: "Tillykke! Du har vundet" });
     }
   }, [matchedCardsCount, cards]);
 
+  // Opdatere states afhængig af forskellige conditions, primært for at tjekke om enkelte cards matcher
   useEffect(() => {
     if (firstChoice && secondChoice) {
       setDisabled(true);
@@ -57,6 +61,7 @@ function App() {
         new Audio(MatchSound).play();
         setCards((prevCards) => {
           return prevCards.map((card) => {
+            // Her kan også bruge secondChoice.src i stedet, da princippet for at compare er det samme
             if (card.src === firstChoice.src) {
               return { ...card, matched: true };
             } else {
@@ -71,6 +76,7 @@ function App() {
     }
   }, [firstChoice, secondChoice]);
 
+  // genstarter turen ved klik på knappen "Start nyt spil"
   const resetTurn = () => {
     setFirstChoice(null);
     setSecondChoice(null);
@@ -78,6 +84,7 @@ function App() {
     setDisabled(false);
   };
 
+  // sætter kortene til at blive vist når app'en åbnes. Fjernes denne skal der klikkes på knappen før der bliver shufflet
   useEffect(() => {
     shuffleCards();
   }, []);
